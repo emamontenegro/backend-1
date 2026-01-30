@@ -1,0 +1,67 @@
+[
+  {
+    "id": "5999ee87-01c2-4878-ab10-6391d585d5c1",
+    "title": "Xiaomi Redmi Note 13",
+    "description": "Smartphone con cámara cuádruple y pantalla AMOLED de 6.67\".",
+    "code": "XIAREDN13",
+    "price": 350000,
+    "status": true,
+    "stock": 12,
+    "category": "smartphones",
+    "thumbnails": [
+      "img"
+    ]
+  },
+  {
+    "id": "fd1a5695-275d-40ec-bbe0-380e8c98a88a",
+    "title": "Motorola Moto G54",
+    "description": "Celular con batería de larga duración y buen rendimiento.",
+    "code": "MOTG54",
+    "price": 310000,
+    "status": true,
+    "stock": 10,
+    "category": "smartphones",
+    "thumbnails": [
+      "img"
+    ]
+  },
+  {
+    "id": "0e1f4f9b-92c3-4191-b2b5-20ae6848eeaa",
+    "title": "OnePlus Nord CE 3",
+    "description": "Equipo equilibrado con carga rápida y pantalla fluida.",
+    "code": "ONEPCE3",
+    "price": 580000,
+    "status": true,
+    "stock": 7,
+    "category": "smartphones",
+    "thumbnails": [
+      "img"
+    ]
+  },
+  {
+    "id": "b730adf1-d25e-4663-9f40-ccc59edd460d",
+    "title": "iPhone SE (3ra generación)",
+    "description": "iPhone SE compacto con chip A15 Bionic.",
+    "code": "IPHSE3",
+    "price": 600000,
+    "status": true,
+    "stock": 6,
+    "category": "smartphones",
+    "thumbnails": [
+      "img"
+    ]
+  },
+  {
+    "id": "bb99422b-29ef-418d-84f1-c2a90a1cd97b",
+    "title": "Google Pixel 8a",
+    "description": "Pixel compacto con excelente cámara y Android puro.",
+    "code": "PIX8A",
+    "price": 700000,
+    "status": true,
+    "stock": 8,
+    "category": "smartphones",
+    "thumbnails": [
+      "img"
+    ]
+  }
+]
