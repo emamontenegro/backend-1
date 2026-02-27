@@ -1,0 +1,33 @@
+[
+  {
+    "id": "d87194e6-2178-4f4a-900e-594e3eacb99f",
+    "title": "Samsung Galaxy A56",
+    "description": "Smartphone gama media con pantalla AMOLED y gran batería.",
+    "code": "SAMA56",
+    "price": 620000,
+    "stock": 10,
+    "category": "smartphones",
+    "status": true
+  },
+  {
+    "id": "947b12ec-cd30-414e-b216-9e6bd54c9fc1",
+    "title": "iPhone 13",
+    "description": "iPhone con excelente rendimiento y cámara avanzada.",
+    "code": "IPH13",
+    "price": 780000,
+    "stock": 7,
+    "category": "smartphones",
+    "status": true
+  },
+  {
+    "id": "dc0c6d0a-d60e-40b5-8de9-ee64569fc016",
+    "title": "Samsung s23FE",
+    "description": "Versión Fan Edition con gran rendimiento, cámara avanzada y pantalla AMOLED.",
+    "code": "S23FE",
+    "price": 845000,
+    "stock": 3,
+    "category": "smartphones",
+    "thumbnail": "/uploads/thumbnail-1770597354290-626882507-OPHS.jfif",
+    "status": true
+  }
+]

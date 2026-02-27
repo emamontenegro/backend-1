@@ -1,0 +1,39 @@
+<div class="home-container">
+  <h2>Bienvenido {{user.name}}!</h2>
+  <p>Email: {{user.email}}</p>
+  <p>Rol: {{roleLabel}}</p>
+
+  <h3>Agregar Productos</h3>
+  <div>
+    <form id="addProductForm" enctype="multipart/form-data">
+
+      <label>Título:</label>
+      <input type="text" name="title" required>
+
+      <label>Descripción:</label>
+      <input type="text" name="description" required>
+
+      <label>Precio:</label>
+      <input type="number" name="price" required>
+
+      <label>Código:</label>
+      <input type="text" name="code" required>
+
+      <label>Stock:</label>
+      <input type="number" name="stock" required>
+
+      <label>Categoría:</label>
+      <input type="text" name="category" required>
+
+      <label>Imagen:</label>
+      <input type="file" name="thumbnail" accept="image/*" required>
+
+      <button type="submit">Agregar Producto</button>
+
+    </form>
+  </div>
+
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/admin.js"></script>

@@ -1,0 +1,74 @@
+/* Contenedor principal */
+.home-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem;
+}
+
+/* Bienvenida */
+.home-container h2 {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.home-container p {
+  color: #bbb;
+  margin-bottom: 0.3rem;
+}
+
+/* Sección formulario */
+.home-container h3 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-size: 1.4rem;
+  color: #4caf50;
+}
+
+/* Formulario */
+form {
+  background-color: #1e1e2a;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  display: grid;
+  gap: 0.8rem;
+}
+
+/* Labels */
+label {
+  font-size: 0.9rem;
+  color: #aaa;
+}
+
+/* Inputs */
+input {
+  padding: 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #333;
+  background-color: #12121a;
+  color: white;
+  transition: border 0.2s ease;
+}
+
+input:focus {
+  outline: none;
+  border-color: #4caf50;
+}
+
+/* Botón */
+button {
+  margin-top: 1rem;
+  padding: 0.8rem;
+  border-radius: 6px;
+  border: none;
+  background-color: #4caf50;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  background-color: #43a047;
+  transform: translateY(-2px);
+}

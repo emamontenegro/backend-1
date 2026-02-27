@@ -1,10 +1,16 @@
 import fs from 'fs/promises';
 import crypto from 'crypto';
 
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 class CartsManager {
-  constructor() {
-    this.path = './src/carts.json';
+  constructor() {   
     this.carts = [];
+    this.path = path.join(__dirname, '../data/carts.json');
   }
 
   async getCarts() {
@@ -12,7 +18,7 @@ class CartsManager {
       const data = await fs.readFile(this.path, 'utf-8');
       this.carts = JSON.parse(data);
       return this.carts;
-    } catch {
+    } catch (error) {
       this.carts = [];
       return this.carts;
     }
