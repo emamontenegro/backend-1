@@ -4,7 +4,7 @@
   <p>Rol: {{roleLabel}}</p>
 
   <h3>Agregar Productos</h3>
-  <div>
+  <div class="form">
     <form id="addProductForm" enctype="multipart/form-data">
 
       <label>Título:</label>
@@ -32,6 +32,37 @@
 
     </form>
   </div>
+
+  <h3>Lista de Productos</h3>
+
+  <div id="productList" class="product-list">
+
+    <div class="product-item product-header">
+      <span>Producto</span>
+      <span>Precio</span>
+      <span>Stock</span>
+      <span>Categoría</span>
+    </div>
+
+    {{#each products}}
+      <div class="product-item">
+        <span>{{this.title}}</span>
+        <span>${{this.price}}</span>
+        <span>{{this.stock}}</span>
+        <span>{{this.category}}</span>
+        <span>
+      <button class="delete-btn" data-id="{{this.id}}">
+        Eliminar
+      </button>
+    </span>
+      </div>
+    {{/each}}
+
+  </div>
+
+  {{#if emptyMessage}}
+    <p>{{emptyMessage}}</p>
+  {{/if}}
 
 </div>
 

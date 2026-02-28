@@ -1,18 +1,49 @@
 // admin.js
+
 const socket = io();
 
-socket.on("updateProducts", products => {
-  const list = document.getElementById("productList");
-  list.innerHTML = "";
-
-  products.forEach(product => {
-    const li = document.createElement("li");
-    li.textContent = `${product.title} - $${product.price}`;
-    list.appendChild(li);
-  });
+// Escuchar actualizaciones de productos
+socket.on("updateProducts", (products) => {
+  renderProducts(products);
 });
 
-// Agregar nuevo producto desde el formulario
+// Renderizar lista
+function renderProducts(products) {
+
+  const container = document.getElementById("productList");
+
+  container.innerHTML = `
+    <div class="product-item product-header">
+      <span>Producto</span>
+      <span>Precio</span>
+      <span>Stock</span>
+      <span>Categoría</span>
+      <span>Acción</span>
+    </div>
+  `;
+
+  products.forEach(product => {
+
+    const row = document.createElement("div");
+    row.classList.add("product-item");
+
+    row.innerHTML = `
+      <span>${product.title}</span>
+      <span>$${product.price}</span>
+      <span>${product.stock}</span>
+      <span>${product.category}</span>
+      <span>
+        <button class="delete-btn" data-id="${product.id}">
+          Eliminar
+        </button>
+      </span>
+    `;
+
+    container.appendChild(row);
+  });
+}
+
+// Agregar nuevo producto
 const form = document.getElementById("addProductForm");
 
 if (form) {
@@ -29,3 +60,18 @@ if (form) {
     form.reset();
   });
 }
+
+// Eliminar producto
+document.addEventListener("click", async (e) => {
+
+  if (e.target.classList.contains("delete-btn")) {
+
+    const id = e.target.dataset.id;
+
+    await fetch(`/api/products/${id}`, {
+      method: "DELETE"
+    });
+
+  }
+
+});

@@ -42,7 +42,6 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', upload.single('thumbnail'), async (req, res) => {
   try {
-    
     // Validar archivo
     if (!req.file) {
       return res.status(400).json({
@@ -125,12 +124,14 @@ router.delete('/:id', async (req, res) => {
     });
   }
 
-  // Socket.IO: Emitir evento para actualizar la lista de productos en tiempo real
-  const io = req.app.get("io");
-  const products = await productsManager.getProducts();
-  io.emit("updateProducts", products);
+  // Emitir actualización por Socket.IO
+  const updatedProducts = await productsManager.getProducts();
 
-  res.json({
+  // Obtener instancia de Socket.IO y emitir evento
+  const io = req.app.get("io");
+  io.emit("updateProducts", updatedProducts);
+
+  res.status(200).json({
     status: 'success',
     message: 'Producto eliminado'
   });

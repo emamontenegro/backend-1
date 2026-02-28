@@ -5,34 +5,37 @@ const router = express.Router();
 const productsManager = new ProductsManager();
 
 // Ruta para la página de admin
-router.get('/', (req, res) => {
-    const user = {
-        name: 'Emanuel',
-        email: 'montenegroemanuel995@gmail.com',
-        role: 'admin'
-    };
 
-    let roleLabel;
+router.get('/', async (req, res) => {
 
-    if (user.role === 'admin') {
-        roleLabel = 'Administrador';
-    } else { roleLabel = 'Usuario'; }
+  const products = await productsManager.getProducts();
 
-    res.render('home', {
-        title: 'Home Page',
-        styles: ['home.css'],
-        user,
-        roleLabel
-    });
+  const user = {
+    name: 'Emanuel',
+    email: 'montenegroemanuel995@gmail.com',
+    role: 'admin'
+  };
+
+  const roleLabel = user.role === 'admin' ? 'Administrador' : 'Usuario';
+
+  res.render('home', {
+    title: 'Home Page',
+    styles: ['home.css'],
+    user,
+    roleLabel,
+    products,
+    emptyMessage: products.length === 0 ? "No hay productos cargados." : null
+  });
 });
 
 // Ruta para la página de productos en tiempo real
+
 router.get('/realtimeproducts', async (req, res) => {
-    const products = await productsManager.getProducts();
-    res.render('realTimeProducts', { 
-        title: 'Real Time Products',
-        products: products || [],
-        styles: ['realTime.css']});
+  const products = await productsManager.getProducts();
+  res.render('realTimeProducts', { 
+    title: 'Real Time Products',
+    products: products || [],
+    styles: ['realTime.css']});
 });
 
 export default router;
