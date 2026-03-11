@@ -1,15 +1,19 @@
 import express from 'express';
-import ProductsManager from '../productsManager.js';
-import { upload } from '../utils/utils.js';
+// import ProductsManager from '../productsManager.js';
+// import { upload } from '../utils/utils.js';
+import { getDB } from '../db/mongo.js';
+import { ObjectId } from 'mongodb';
+
+const collection = () => getDB().collection('Products');
 
 const router = express.Router();
 
-const productsManager = new ProductsManager();
+// const productsManager = new ProductsManager();
 
 // ruta para obtener todos los productos
 
 router.get('/', async (req, res) => {
-  const products = await productsManager.getProducts();
+  const products = await collection().find().toArray();
   res.json(products);
 });
 
@@ -17,11 +21,9 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   
-  const products = await productsManager.getProducts();
-  
   const { id } = req.params;
-  
-  const product = products.find(item => item.id === id);
+
+  const product = await collection().findOne({ _id: new ObjectId(id) });
   
   if (!product) {
     
@@ -40,20 +42,12 @@ router.get('/:id', async (req, res) => {
 
 // guardar un nuevo producto
 
-router.post('/', upload.single('thumbnail'), async (req, res) => {
+router.post('/', async (req, res) => {
   try {
-    // Validar archivo
-    if (!req.file) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Thumbnail image is required'
-      });
-    }
 
-    // Extraer datos del body
-    const { title, description, price, code, stock, category } = req.body;
+    // Validar que todos los campos requeridos estén presentes y sean del tipo correcto
+    const { title, description, price, code, stock, category, thumbnail } = req.body;
 
-    // Validaciones básicas
     if (!title || !description || !price || !code || !stock || !category) {
       return res.status(400).json({
         status: 'error',
@@ -61,7 +55,7 @@ router.post('/', upload.single('thumbnail'), async (req, res) => {
       });
     }
 
-    // Convertir tipos correctamente
+    // Validar que price y stock sean números válidos
     const parsedPrice = Number(price);
     const parsedStock = Number(stock);
 
@@ -72,37 +66,26 @@ router.post('/', upload.single('thumbnail'), async (req, res) => {
       });
     }
 
-    //  Construir URL de la imagen subida
-    const imageUrl = `/uploads/${req.file.filename}`;
-
-    //  Crear producto
-    const newProduct = await productsManager.createProduct({
+    // Insertar el nuevo producto en la base de datos
+    const newProduct = await collection().insertOne({
       title,
       description,
       price: parsedPrice,
       code,
       stock: parsedStock,
       category,
-      thumbnail: imageUrl
+      thumbnail: thumbnail || null
     });
 
-    // Emitir actualización por Socket.IO
-    const io = req.app.get("io");
-    if (io) {
-      const products = await productsManager.getProducts();
-      io.emit("updateProducts", products);
-    }
-
-    // Respuesta
-    return res.status(201).json({
+    res.status(201).json({
       status: 'success',
       data: newProduct
     });
 
   } catch (error) {
-    console.error("Error creating product:", error);
+    console.error(error);
 
-    return res.status(500).json({
+    res.status(500).json({
       status: 'error',
       message: 'Internal server error'
     });
@@ -115,26 +98,29 @@ router.delete('/:id', async (req, res) => {
 
   const { id } = req.params;
 
-  const deleted = await productsManager.deleteProductById(id);
+  const result = await collection().deleteOne({ _id: new ObjectId(id) });
 
-  if (!deleted) {
+  if (result.deletedCount === 0) {
     return res.status(404).json({
       status: 'error',
       message: 'Producto no encontrado'
     });
   }
 
-  // Emitir actualización por Socket.IO
-  const updatedProducts = await productsManager.getProducts();
+  // Emitir actualización por Socket.IO después de eliminar el producto
 
-  // Obtener instancia de Socket.IO y emitir evento
+  const updatedProducts = await collection().find().toArray();
+
+  // Obtener la instancia de Socket.IO desde la aplicación y emitir el evento de actualización
+
   const io = req.app.get("io");
-  io.emit("updateProducts", updatedProducts);
+  if (io) io.emit("updateProducts", updatedProducts);
 
-  res.status(200).json({
+  res.json({
     status: 'success',
     message: 'Producto eliminado'
   });
+
 });
 
 
@@ -144,9 +130,9 @@ router.put('/:id', async (req, res) => {
   
   const { id } = req.params;
 
-  const products = await productsManager.getProducts();
+  const products = await collection().find().toArray();
 
-  const productIndex = products.findIndex(item => item.id === id);
+  const productIndex = products.findIndex(item => item._id === new ObjectId(id));
 
   if (productIndex === -1) {
     return res.status(404).json({
@@ -161,7 +147,7 @@ router.put('/:id', async (req, res) => {
     id
   };
 
-  await productsManager.saveProductsToFile();
+  await collection().replaceOne({ _id: id }, products[productIndex]);
 
   res.json({
     status: 'success',

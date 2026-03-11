@@ -6,8 +6,16 @@ import path from 'path';
 import __dirname from './utils/utils.js';
 import viewsRouter from './routes/views.router.js';
 import { Server } from 'socket.io';
+import { connectToMongoDB } from './db/mongo.js';
 
 const app = express();
+
+// Conectar a MongoDB
+
+const MONGO_URI = 'mongodb://localhost:27017';
+const DB_NAME = 'Backend-I';
+
+await connectToMongoDB(MONGO_URI, DB_NAME);
 
 // Middleware para parsear JSON y datos de formularios
 
