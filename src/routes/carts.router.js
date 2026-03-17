@@ -1,66 +1,66 @@
-import express from 'express';
-import CartsManager from '../cartsManager.js';
+// import express from 'express';
 
-const router = express.Router();
 
-const cartsManager = new CartsManager();
+// const router = express.Router();
 
-// crear ruta para el carrito de compras
+// const cartsManager = new CartsManager();
 
-router.post('/', async (req, res) => {
-  const newCart = await cartsManager.createCart();
-  res.status(201).json({
-    status: 'success',
-    data: newCart
-  });
-});
+// // crear ruta para el carrito de compras
 
-// lista de productos en el carrito
+// router.post('/', async (req, res) => {
+//   const newCart = await cartsManager.createCart();
+//   res.status(201).json({
+//     status: 'success',
+//     data: newCart
+//   });
+// });
 
-router.get('/:cid', async (req, res) => {
-  const { cid } = req.params;
+// // lista de productos en el carrito
 
-  const cart = await cartsManager.getCartById(cid);
+// router.get('/:cid', async (req, res) => {
+//   const { cid } = req.params;
 
-  if (!cart) {
-    return res.status(404).json({
-      status: 'error',
-      message: 'Carrito no encontrado'
-    });
-  }
+//   const cart = await cartsManager.getCartById(cid);
 
-  res.json({
-    status: 'success',
-    data: cart.products
-  });
-});
+//   if (!cart) {
+//     return res.status(404).json({
+//       status: 'error',
+//       message: 'Carrito no encontrado'
+//     });
+//   }
 
-// agregar producto al carrito
+//   res.json({
+//     status: 'success',
+//     data: cart.products
+//   });
+// });
 
-router.post('/:cid/:pid', async (req, res) => {
-  const { cid, pid } = req.params;
+// // agregar producto al carrito
 
-  const product = await productsManager.getProductById(pid);
-  if (!product) {
-    return res.status(404).json({
-      status: 'error',
-      data: 'Producto no encontrado'
-    });
-  }
+// router.post('/:cid/:pid', async (req, res) => {
+//   const { cid, pid } = req.params;
 
-  const updatedCart = await cartsManager.addProductToCart(cid, pid);
+//   const product = await productsManager.getProductById(pid);
+//   if (!product) {
+//     return res.status(404).json({
+//       status: 'error',
+//       data: 'Producto no encontrado'
+//     });
+//   }
 
-  if (!updatedCart) {
-    return res.status(404).json({
-      status: 'error',
-      message: 'Carrito no encontrado'
-    });
-  }
+//   const updatedCart = await cartsManager.addProductToCart(cid, pid);
 
-  res.json({
-    status: 'success',
-    data: updatedCart
-  });
-});
+//   if (!updatedCart) {
+//     return res.status(404).json({
+//       status: 'error',
+//       message: 'Carrito no encontrado'
+//     });
+//   }
 
-export default router;
+//   res.json({
+//     status: 'success',
+//     data: updatedCart
+//   });
+// });
+
+// export default router;

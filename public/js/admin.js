@@ -33,7 +33,7 @@ function renderProducts(products) {
       <span>${product.stock}</span>
       <span>${product.category}</span>
       <span>
-        <button class="delete-btn" data-id="${product.id}">
+        <button class="delete-btn" data-id="${product._id}">
           Eliminar
         </button>
       </span>
@@ -48,14 +48,12 @@ const form = document.getElementById("addProductForm");
 
 if (form) {
   form.addEventListener("submit", async (e) => {
+
     e.preventDefault();
 
     const formData = new FormData(form);
 
-    await fetch("/api/products", {
-      method: "POST",
-      body: formData
-    });
+    await fetch("/api/products", { method: "POST", body: formData });
 
     form.reset();
   });
@@ -67,11 +65,6 @@ document.addEventListener("click", async (e) => {
   if (e.target.classList.contains("delete-btn")) {
 
     const id = e.target.dataset.id;
-
-    await fetch(`/api/products/${id}`, {
-      method: "DELETE"
-    });
-
+    await fetch(`/api/products/${id}`, { method: "DELETE" });
   }
-
 });

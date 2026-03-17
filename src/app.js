@@ -1,67 +1,54 @@
+import 'dotenv/config';
 import express from 'express';
 import handlebars from 'express-handlebars';
-import productsRouter from './routes/products.router.js';
-import cartsRouter from './routes/carts.router.js'; 
 import path from 'path';
-import __dirname from './utils/utils.js';
-import viewsRouter from './routes/views.router.js';
 import { Server } from 'socket.io';
-import { connectToMongoDB } from './db/mongo.js';
+
+// Importación de base de datos
+import dbConnection from './config/db.js';
+
+// Importación de rutas
+import productsRouter from './routes/products.router.js';
+// import cartsRouter from './routes/carts.router.js'; 
+import viewsRouter from './routes/views.router.js';
+import __dirname from './utils/utils.js';
 
 const app = express();
 
-// Conectar a MongoDB
+// Conexión a Base de Datos
+dbConnection();
 
-const MONGO_URI = 'mongodb://localhost:27017';
-const DB_NAME = 'Backend-I';
-
-await connectToMongoDB(MONGO_URI, DB_NAME);
-
-// Middleware para parsear JSON y datos de formularios
-
+// Middleware y Configuración
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Configuración de Handlebars como motor de plantillas
-
+// Motor de Plantillas (Handlebars)
 app.engine('handlebars', handlebars.engine({
   layoutsDir: path.join(__dirname, '../views/layouts'),
   defaultLayout: 'main',
   partialsDir: path.join(__dirname, '../views/partials')
 }));
-
 app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, '../views'));
 
-// Middleware para servir archivos estáticos
-
+// Archivos estáticos y Rutas
 app.use('/', express.static(path.join(__dirname, '../../public')));
 app.use('/api/products', productsRouter);
-app.use('/api/carts', cartsRouter);
-
+// app.use('/api/carts', cartsRouter);
 app.use('/', viewsRouter);
- 
-// Iniciar el servidor
 
+// Servidor y Socket.io
 const PORT = 8080;
-
-// app.listen(PORT, () => {console.log(`El servidor se corre en http://localhost:${PORT}`);});
-
-// Iniciar el servidor HTTP y luego configurar Socket.IO
-
-const httpServer = app.listen(8080, () => {
-    console.log(`El servidor se corre en http://localhost:8080`);
+const httpServer = app.listen(PORT, () => {
+    console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });
 
 const io = new Server(httpServer);
-
 app.set("io", io);
 
 io.on('connection', socket => {
   console.log('Nuevo cliente conectado ' + socket.id);
-
   socket.on('disconnect', () => {
     console.log('Cliente desconectado ' + socket.id);
   });
 });
-

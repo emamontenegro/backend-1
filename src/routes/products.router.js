@@ -1,158 +1,152 @@
 import express from 'express';
-// import ProductsManager from '../productsManager.js';
-// import { upload } from '../utils/utils.js';
-import { getDB } from '../db/mongo.js';
-import { ObjectId } from 'mongodb';
-
-const collection = () => getDB().collection('Products');
+import productsModel from '../models/products.model.js';
+import upload from '../middleware/multer.js';
 
 const router = express.Router();
-
-// const productsManager = new ProductsManager();
 
 // ruta para obtener todos los productos
 
 router.get('/', async (req, res) => {
-  const products = await collection().find().toArray();
-  res.json(products);
+
+  try {
+    const products = await productsModel.find();
+    res.json({ status: 'success', data: products });
+  
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ status: 'error', message: 'Internal server error' });
+  }
+});
+
+// ruta para filtrar productos por título, categoría, precio máximo o código
+
+router.get('/filter', async (req, res) => {
+
+  try {
+    const {title, category, minPrice, maxPrice, code } = req.query;
+    const filter = {};
+
+    if (title) {
+      filter.$or = [
+      { title: { $regex: title, $options: "i" } },
+      { category: { $regex: title, $options: "i" } }
+      ];
+    }
+    if (minPrice || maxPrice) { 
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
+      }
+    if (code) filter.code = code;
+
+    const products = await productsModel.find(filter);
+
+    res.json({ status: 'success', data: products });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ status: 'error', message: 'Internal server error' });
+  }
 });
 
 // ruta para obtener un producto por id
 
 router.get('/:id', async (req, res) => {
   
-  const { id } = req.params;
-
-  const product = await collection().findOne({ _id: new ObjectId(id) });
-  
-  if (!product) {
-    
-    return res.status(404).json({
-      status: 'error',
-      message: 'Producto no encontrado',
-    });
-
-  }
-
-    res.json({
-      status: 'success',
-      data: product
-    });
-});
-
-// guardar un nuevo producto
-
-router.post('/', async (req, res) => {
   try {
+    const { id } = req.params;
+    const product = await productsModel.findById(id);
 
-    // Validar que todos los campos requeridos estén presentes y sean del tipo correcto
-    const { title, description, price, code, stock, category, thumbnail } = req.body;
-
-    if (!title || !description || !price || !code || !stock || !category) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'All fields are required'
-      });
+    if (!product) {
+      return res.status(404).json({ status: 'error', message: 'Producto no encontrado' });
     }
 
-    // Validar que price y stock sean números válidos
-    const parsedPrice = Number(price);
-    const parsedStock = Number(stock);
-
-    if (isNaN(parsedPrice) || isNaN(parsedStock)) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Price and stock must be valid numbers'
-      });
-    }
-
-    // Insertar el nuevo producto en la base de datos
-    const newProduct = await collection().insertOne({
-      title,
-      description,
-      price: parsedPrice,
-      code,
-      stock: parsedStock,
-      category,
-      thumbnail: thumbnail || null
-    });
-
-    res.status(201).json({
-      status: 'success',
-      data: newProduct
-    });
+    res.json({ status: 'success', data: product });
 
   } catch (error) {
     console.error(error);
-
-    res.status(500).json({
-      status: 'error',
-      message: 'Internal server error'
-    });
+    res.status(500).json({ status: 'error', message: 'Internal server error' });
   }
 });
+
+
+
+// guardar un nuevo producto
+
+router.post("/", upload.single("thumbnail"), async (req, res) => {
+
+  try {
+
+    const newProduct = await productsModel.create({
+      ...req.body,
+      thumbnail: req.file ? `/uploads/${req.file.filename}` : null
+    });
+
+    const updatedProducts = await productsModel.find();
+
+    const io = req.app.get("io");
+    if (io) io.emit("updateProducts", updatedProducts);
+
+    res.status(201).json({ status: "success", data: newProduct });
+
+  } catch (error) {
+
+    if (error.code === 11000) {
+      return res.status(400).json({ status: "error", message: "El código del producto ya existe" });
+    }
+
+    res.status(400).json({ status: "error", message: "Error creating product" });
+  }
+
+});
+
 
 // eliminar un producto
 
 router.delete('/:id', async (req, res) => {
+  try {
 
-  const { id } = req.params;
+    const { id } = req.params;
+    const deletedProduct = await productsModel.findByIdAndDelete(id);
 
-  const result = await collection().deleteOne({ _id: new ObjectId(id) });
+    if (!deletedProduct) {
+      return res.status(404).json({ status: 'error', message: 'Producto no encontrado' });
+    }
 
-  if (result.deletedCount === 0) {
-    return res.status(404).json({
-      status: 'error',
-      message: 'Producto no encontrado'
-    });
+    const updatedProducts = await productsModel.find();
+
+    const io = req.app.get("io");
+    if (io) io.emit("updateProducts", updatedProducts);
+
+    res.json({ status: 'success', message: 'Product deleted' });
+
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: 'Internal server error' });
   }
-
-  // Emitir actualización por Socket.IO después de eliminar el producto
-
-  const updatedProducts = await collection().find().toArray();
-
-  // Obtener la instancia de Socket.IO desde la aplicación y emitir el evento de actualización
-
-  const io = req.app.get("io");
-  if (io) io.emit("updateProducts", updatedProducts);
-
-  res.json({
-    status: 'success',
-    message: 'Producto eliminado'
-  });
-
 });
 
 
 // actualizar un producto
 
 router.put('/:id', async (req, res) => {
-  
-  const { id } = req.params;
+  try {
 
-  const products = await collection().find().toArray();
+    const { id } = req.params;
 
-  const productIndex = products.findIndex(item => item._id === new ObjectId(id));
+    const updatedProduct = await productsModel.findByIdAndUpdate(
+      id,
+      req.body,
+      { returnDocument: 'after', runValidators: true }
+    );
 
-  if (productIndex === -1) {
-    return res.status(404).json({
-      status: 'error',
-      message: 'Producto no encontrado'
-    });
+    if (!updatedProduct) {
+      return res.status(404).json({ status: 'error', message: 'Producto no encontrado' });
+    }
+    res.json({ status: 'success', data: updatedProduct });
+
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: 'internal server error' });
   }
-
-  products[productIndex] = { 
-    ...products[productIndex],
-    ...req.body,
-    id
-  };
-
-  await collection().replaceOne({ _id: id }, products[productIndex]);
-
-  res.json({
-    status: 'success',
-    data: products[productIndex]
-  });
 });
 
 export default router;

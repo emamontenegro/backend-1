@@ -77,3 +77,39 @@
 .delete-btn:hover {
   background: #dc2626;
 }
+
+/* Filtros de búsqueda */
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.search-prod {
+  width: 100%;
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.input-filter {
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  width: 200px;
+}
+
+.button-filter {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.button-filter:hover {
+  background: #2563eb;
+}

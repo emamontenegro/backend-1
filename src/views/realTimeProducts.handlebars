@@ -1,6 +1,19 @@
 <div class="realtime-container">
   <h2>Productos en tiempo real</h2>
 
+  <div class="filters">
+    <h3 class="search-prod">Buscar Productos</h3>
+
+      <input type="text" id="searchTitle" placeholder="Buscar producto" class="input-filter">
+  
+      <input type="number" id="minPrice" placeholder="Precio mínimo" class="input-filter">
+  
+      <input type="number" id="maxPrice" placeholder="Precio máximo" class="input-filter">
+
+      <button id="resetBtn" class="button-filter">Resetear Filtros</button>
+  
+  </div>
+  
   <div class="products-grid">
 
     {{#each products}}
@@ -8,25 +21,15 @@
 
         <h3 class="product-title">{{this.title}}</h3>
 
-        <p class="product-description">
-          {{this.description}}
-        </p>
+        <p class="product-description">{{this.description}}</p>
 
-        <p class="product-price">
-          ${{this.price}}
-        </p>
+        <p class="product-price">${{this.price}}</p>
 
-        <p class="product-stock">
-          Stock: {{this.stock}}
-        </p>
+        <p class="product-stock">Stock: {{this.stock}}</p>
 
-        <p class="product-category">
-          Categoría: {{this.category}}
-        </p>
+        <p class="product-category">Categoría: {{this.category}}</p>
 
-        <button class="delete-btn" data-id="{{this.id}}">
-          Eliminar Producto
-        </button>
+        <button class="delete-btn" data-id="{{this._id}}">Eliminar Producto</button>
 
       </div>
     {{/each}}
@@ -35,4 +38,4 @@
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
-<script src="/js/realtimeProducts.js"></script>
+<script type="module" src="/js/realtimeProducts.js"></script>

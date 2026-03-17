@@ -4,6 +4,7 @@
   <p>Rol: {{roleLabel}}</p>
 
   <h3>Agregar Productos</h3>
+
   <div class="form">
     <form id="addProductForm" enctype="multipart/form-data">
 
@@ -26,7 +27,7 @@
       <input type="text" name="category" required>
 
       <label>Imagen:</label>
-      <input type="file" name="thumbnail" accept="image/*" required>
+      <input type="file" name="thumbnail" accept="image/*">
 
       <button type="submit">Agregar Producto</button>
 
@@ -42,6 +43,7 @@
       <span>Precio</span>
       <span>Stock</span>
       <span>Categoría</span>
+      <span>Acción</span>
     </div>
 
     {{#each products}}
@@ -50,11 +52,13 @@
         <span>${{this.price}}</span>
         <span>{{this.stock}}</span>
         <span>{{this.category}}</span>
+
         <span>
-      <button class="delete-btn" data-id="{{this.id}}">
-        Eliminar
-      </button>
-    </span>
+          <button class="delete-btn" data-id="{{this._id}}">
+            Eliminar
+          </button>
+        </span>
+
       </div>
     {{/each}}
 
