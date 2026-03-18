@@ -53,40 +53,56 @@ router.get('/realtimeproducts', async (req, res) => {
 router.get('/products', async (req, res) => {
 
   try {
+    const { limit = 10, page = 1, sort, query } = req.query;
 
-    const { title, category, minPrice, maxPrice } = req.query;
+    let filter = {};
 
-    const filter = {};
-
-    if (title) filter.title = { $regex: title, $options: "i" };
-
-    if (category) filter.category = category;
-
-    if (minPrice || maxPrice) {
-
-      filter.price = {};
-
-      if (minPrice) filter.price.$gte = Number(minPrice);
-
-      if (maxPrice) filter.price.$lte = Number(maxPrice);
-
+    if (query) {
+      if (query === "true" || query === "false") {
+        filter.status = query === "true";
+      } else { filter.category = query };
     }
 
-    const products = await productsModel.find(filter).lean();
+    let sortOption = {};
+    if (sort === "asc") sortOption.price = 1;
+    if (sort === "desc") sortOption.price = -1;
 
-    res.render('home', {
+    const result = await productsModel.paginate(filter, {
+      limit: Number(limit),
+      page: Number(page),
+      sort: sortOption,
+      lean: true
+    });
+
+    res.render('products', {
       title: 'Productos',
-      styles: ['home.css'],
-      products,
-      emptyMessage: products.length === 0 ? "No se encontraron productos." : null
+      styles: ['products.css'],
+      products: result.docs,
+      hasPrevPage: result.hasPrevPage,
+      hasNextPage: result.hasNextPage,
+      prevLink: result.hasPrevPage ? `/products?page=${result.prevPage}` : null,
+      nextLink: result.hasNextPage ? `/products?page=${result.nextPage}` : null
     });
 
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error filtrando productos");
+    res.status(500).send("Error cargando productos");
   }
 });
 
+// Ruta carrito
+router.get('/cart', async (req, res) => {
+  try {
 
+    res.render('cart', {
+      title: 'Carrito',
+      styles: ['carts.css']
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error cargando carrito");
+  }
+});
 
 export default router;

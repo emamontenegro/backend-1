@@ -112,7 +112,7 @@ const resetBtn = async () => {
 
     if (!res.ok) throw new Error("Error al cargar productos");
     const data = await res.json();
-    renderProducts(data.data);
+    renderProducts(data.payload);
 
   } catch (error) {
     console.error("Error al cargar productos:", error);

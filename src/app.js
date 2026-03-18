@@ -9,7 +9,7 @@ import dbConnection from './config/db.js';
 
 // Importación de rutas
 import productsRouter from './routes/products.router.js';
-// import cartsRouter from './routes/carts.router.js'; 
+import cartsRouter from './routes/carts.router.js'; 
 import viewsRouter from './routes/views.router.js';
 import __dirname from './utils/utils.js';
 
@@ -34,7 +34,7 @@ app.set('views', path.join(__dirname, '../views'));
 // Archivos estáticos y Rutas
 app.use('/', express.static(path.join(__dirname, '../../public')));
 app.use('/api/products', productsRouter);
-// app.use('/api/carts', cartsRouter);
+app.use('/api/carts', cartsRouter);
 app.use('/', viewsRouter);
 
 // Servidor y Socket.io

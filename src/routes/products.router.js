@@ -9,12 +9,55 @@ const router = express.Router();
 router.get('/', async (req, res) => {
 
   try {
-    const products = await productsModel.find();
-    res.json({ status: 'success', data: products });
-  
+
+    const { limit = 10, page = 1, sort, query, minPrice, maxPrice } = req.query;
+
+    let filter = {};
+
+    // búsqueda por título o categoría
+    if (query) {
+      filter.$or = [
+        { title: { $regex: query, $options: "i" } },
+        { category: { $regex: query, $options: "i" } }
+      ];
+    }
+
+    // filtro por precio
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
+    }
+
+    // orden por precio
+    let sortOption = {};
+    if (sort === "asc") sortOption.price = 1;
+    if (sort === "desc") sortOption.price = -1;
+
+    // paginación con mongoose-paginate-v2
+    const result = await productsModel.paginate(filter, {
+      limit: Number(limit),
+      page: Number(page),
+      sort: sortOption,
+      lean: true
+    });
+
+    res.json({
+      status: "success",
+      payload: result.docs,
+      totalPages: result.totalPages,
+      prevPage: result.prevPage,
+      nextPage: result.nextPage,
+      page: result.page,
+      hasPrevPage: result.hasPrevPage,
+      hasNextPage: result.hasNextPage,
+      prevLink: result.hasPrevPage ? `/api/products?page=${result.prevPage}` : null,
+      nextLink: result.hasNextPage ? `/api/products?page=${result.nextPage}` : null
+    });
+
   } catch (error) {
     console.error(error);
-    res.status(500).json({ status: 'error', message: 'Internal server error' });
+    res.status(500).json({ status: "error", message: "Internal server error" });
   }
 });
 

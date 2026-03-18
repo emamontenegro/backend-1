@@ -1,0 +1,33 @@
+<div class="products-container">
+
+  <h2 class="title">Productos</h2>
+
+  <div class="filters">
+
+    <input  type="text"  id="searchQuery"  placeholder="Buscar por título o categoría..."  class="input-filter"/>
+
+    <input type="number"  id="minPrice"  placeholder="Precio mínimo"  class="input-filter"/>
+
+    <input  type="number"  id="maxPrice"  placeholder="Precio máximo"  class="input-filter"/>
+
+    <select id="sortPrice" class="input-filter">
+      <option value="">Ordenar</option>
+      <option value="asc">Precio ↑</option>
+      <option value="desc">Precio ↓</option>
+    </select>
+
+    <button id="resetBtn" class="button-filter">Reset</button>
+
+  </div>
+
+  <div class="products-grid"></div>
+
+  <div class="pagination">
+    <button id="prevBtn">Anterior</button>
+    <span id="pageInfo"></span>
+    <button id="nextBtn">Siguiente</button>
+  </div>
+
+</div>
+
+<script src="/js/products.js"></script>
