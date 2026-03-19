@@ -19,7 +19,13 @@ const initCart = async () => {
       console.log("🛒 Nuevo carrito:", CART_ID);
 
     } catch (error) {
-      console.error("Error creando carrito:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "No se pudo crear el carrito",
+          background: "#1e1e2a",
+          color: "#fff"
+        });
     }
   }
 };
@@ -69,7 +75,16 @@ const loadProducts = async () => {
     document.getElementById("pageInfo").innerText =
       `Página ${data.page} de ${data.totalPages}`;
 
-  } catch (error) { console.error(error); alert("Error cargando productos");}
+  } catch (error) { 
+      console.error(error); 
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "No se pudieron cargar los productos",
+        background: "#1e1e2a",
+        color: "#fff"
+      });
+  }
 };
 
 // render productos
@@ -100,18 +115,43 @@ const renderProducts = (products) => {
 // agregar producto al carrito
 document.addEventListener("click", async (e) => {
 
-  if (e.target.classList.contains("add-to-cart-btn")) {
+  const btn = e.target.closest(".add-to-cart-btn");
+  if (!btn) return;
 
-    const pid = e.target.dataset.id;
+  const pid = btn.dataset.id;
 
-    try {
-      const res = await fetch(`/api/carts/${CART_ID}/product/${pid}`, { method: "POST" });
+  try {
+    const res = await fetch(`/api/carts/${CART_ID}/product/${pid}`, { method: "POST" });
 
-      if (!res.ok) throw new Error();
+    if (!res.ok) throw new Error();
 
-      alert("Producto agregado 🛒");
+    btn.textContent = "✔ Agregado";
+    btn.disabled = true;
 
-    } catch (error) { console.error(error); alert("Error agregando producto");}
+    setTimeout(() => {
+      btn.textContent = "Agregar al carrito";
+      btn.disabled = false;
+    }, 1200);
+
+    Swal.fire({
+      toast: true,
+      position: "top-end",
+      icon: "success",
+      title: "Producto agregado",
+      showConfirmButton: false,
+      timer: 1200,
+      background: "#1e1e2a",
+      color: "#fff"
+    });
+
+  } catch (error) { 
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "No se pudo agregar el producto",
+      background: "#1e1e2a",
+      color: "#fff"
+    });
   }
 });
 

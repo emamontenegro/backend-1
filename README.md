@@ -14,8 +14,15 @@ Proyecto full-stack de ejemplo para una tienda online (productos + carrito) con 
   - [Endpoints del backend (API REST)](#endpoints-del-backend-api-rest)
   - [Interacción con el frontend](#interacción-con-el-frontend)
 - [Funcionalidades / Features](#funcionalidades--features)
+  - [Gestión de productos](#gestión-de-productos)
+  - [Gestión de carrito](#gestión-de-carrito)
+  - [Funcionalidades en tiempo real](#funcionalidades-en-tiempo-real)
+  - [Subida de archivos](#subida-de-archivos)
+  - [Paginación y filtros](#paginación-y-filtros)
 - [Tecnologías utilizadas](#tecnologías-utilizadas)
 - [Estructura de datos (Schemas MongoDB)](#estructura-de-datos-schemas-mongodb)
+- [Estructura del proyecto](#estructura-del-proyecto)
+- [Scripts disponibles](#scripts-disponibles)
 - [Diagrama de flujo (ASCII)](#diagrama-de-flujo-ascii)
 - [Roadmap de mejoras](#roadmap-de-mejoras)
 - [Contribución](#contribución)
@@ -27,10 +34,14 @@ Proyecto full-stack de ejemplo para una tienda online (productos + carrito) con 
 
 Este proyecto es una tienda online didáctica que incluye:
 
-- API REST (productos + carrito) con **Express + MongoDB (Mongoose)**.
-- Frontend renderizado con **Handlebars** y **JavaScript cliente**.
-- Funcionalidad en tiempo real usando **Socket.IO** (actualiza la lista de productos sin recargar la página).
-- Subida de imágenes de producto usando **Multer**.
+- **API REST completa** (productos + carrito) con **Express + MongoDB (Mongoose)**.
+- **Frontend renderizado** con **Handlebars** y **JavaScript cliente**.
+- **Funcionalidad en tiempo real** usando **Socket.IO** (actualiza la lista de productos sin recargar la página).
+- **Subida de imágenes** de producto usando **Multer**.
+- **Paginación y filtros avanzados** para búsqueda de productos.
+- **Gestión de carrito de compras** con persistencia en base de datos.
+- **Panel de administración** para agregar, editar y eliminar productos en tiempo real.
+- **Script de seed** para cargar productos de ejemplo.
 
 ---
 
@@ -63,9 +74,9 @@ MONGO_URI=<TU_URI_DE_MONGODB>
 
 | Comando | Descripción |
 | ------- | ----------- |
-| `npm run dev` | Inicia el servidor en modo desarrollo (recomendado) |
+| `npm run dev` | Inicia el servidor en modo desarrollo (recomendado) con recarga automática |
 | `npm start` | Inicia el servidor en modo producción |
-| `node src/scripts/seed.products.js` | Carga productos de ejemplo en la base de datos |
+| `node src/scripts/seed.products.js` | Carga productos de ejemplo en la base de datos (60 productos) |
 
 ---
 
@@ -82,9 +93,9 @@ npm run dev
 
 3. Abre en el navegador:
 
-- `http://localhost:8080/` → Panel principal (agregar / eliminar productos).
-- `http://localhost:8080/products` → Listado paginado + filtros.
-- `http://localhost:8080/realtimeproducts` → Lista en tiempo real.
+- `http://localhost:8080/` → Panel principal (agregar / eliminar productos en tiempo real).
+- `http://localhost:8080/products` → Listado paginado + filtros de búsqueda.
+- `http://localhost:8080/realtimeproducts` → Lista en tiempo real con búsqueda.
 - `http://localhost:8080/carts` → Carrito de compras.
 
 ---
@@ -97,340 +108,146 @@ npm run dev
 Obtiene productos paginados con filtros.
 
 **Query params:**
-- `limit` (número) — cantidad por página.
-- `page` (número) — página actual.
-- `sort` (`asc`|`desc`) — orden por precio.
-- `query` (texto) — busca en `title` o `category`.
+- `limit` (número) — cantidad por página (default: 10).
+- `page` (número) — página actual (default: 1).
+- `sort` ("asc"|"desc") — ordenar por precio.
+- `query` (string) — búsqueda por título o categoría.
 - `minPrice` (número) — precio mínimo.
 - `maxPrice` (número) — precio máximo.
 
-**Ejemplo request:**
-
-```http
-GET /api/products?limit=5&page=1&sort=asc&query=smartphones
-```
-
-**Ejemplo response:**
-
+**Respuesta:**
 ```json
 {
   "status": "success",
-  "payload": [
-    {
-      "_id": "642...",
-      "title": "iPhone 14",
-      "price": 1099000,
-      "category": "smartphones"
-    }
-  ],
+  "payload": [...productos],
   "totalPages": 5,
+  "prevPage": null,
+  "nextPage": 2,
   "page": 1,
+  "hasPrevPage": false,
   "hasNextPage": true,
-  "nextPage": 2
+  "prevLink": null,
+  "nextLink": "/api/products?page=2"
 }
 ```
-
----
 
 #### `GET /api/products/filter`
-Filtra productos por campos específicos.
-
-**Query params:**
-- `title` (texto) — busca en título y categoría.
-- `category` (texto) — filtra por categoría exacta.
-- `minPrice`, `maxPrice` (números)
-- `code` (texto)
-
-**Ejemplo request:**
-
-```http
-GET /api/products/filter?title=iphone&minPrice=500000
-```
-
-**Ejemplo response:**
-
-```json
-{
-  "status": "success",
-  "data": [
-    {
-      "_id": "642...",
-      "title": "iPhone 14",
-      "price": 1099000
-    }
-  ]
-}
-```
-
----
+Filtra productos por título, categoría, código o rango de precios.
 
 #### `GET /api/products/:id`
-Retorna un producto por ID.
-
-**Ejemplo request:**
-
-```http
-GET /api/products/642...
-```
-
-**Ejemplo response:**
-
-```json
-{
-  "status": "success",
-  "data": {
-    "_id": "642...",
-    "title": "iPhone 14",
-    "price": 1099000,
-    "stock": 22,
-    "category": "smartphones"
-  }
-}
-```
-
----
+Obtiene un producto específico por ID.
 
 #### `POST /api/products`
-Crea un producto nuevo.
+Crea un nuevo producto. Soporta subida de imagen (`thumbnail`).
 
-**Tipo de request:** `multipart/form-data`
-
-**Campos esperados:**
-- `title` (string)
-- `description` (string)
-- `price` (number)
-- `code` (string, único)
-- `stock` (number)
-- `category` (string)
-- `thumbnail` (archivo de imagen)
-
-**Ejemplo curl:**
-
-```bash
-curl -X POST http://localhost:8080/api/products \
-  -F "title=Test" \
-  -F "description=Desc" \
-  -F "price=123" \
-  -F "code=TEST123" \
-  -F "stock=10" \
-  -F "category=test" \
-  -F "thumbnail=@/ruta/a/imagen.jpg"
-```
-
-**Ejemplo response:**
-
-```json
-{
-  "status": "success",
-  "data": {
-    "_id": "642...",
-    "title": "Test",
-    "thumbnail": "/uploads/thumbnail-...jpg"
-  }
-}
-```
-
----
+**Body (form-data):**
+- title, description, price, code, stock, category (requeridos)
+- thumbnail (archivo imagen)
 
 #### `PUT /api/products/:id`
 Actualiza un producto existente.
 
-**Ejemplo request:**
-
-```http
-PUT /api/products/642... 
-Content-Type: application/json
-
-{ "price": 1200000 }
-```
-
-**Ejemplo response:**
-
-```json
-{
-  "status": "success",
-  "data": {
-    "_id": "642...",
-    "price": 1200000
-  }
-}
-```
-
----
-
 #### `DELETE /api/products/:id`
 Elimina un producto.
-
-**Ejemplo request:**
-
-```http
-DELETE /api/products/642...
-```
-
-**Ejemplo response:**
-
-```json
-{
-  "status": "success",
-  "message": "Product deleted"
-}
-```
-
----
 
 ### Carrito
 
 #### `POST /api/carts`
-Crea un carrito nuevo.
-
-**Ejemplo response:**
-
-```json
-{
-  "status": "success",
-  "data": { "_id": "642...", "products": [] }
-}
-```
-
----
+Crea un nuevo carrito vacío.
 
 #### `GET /api/carts/:cid`
-Obtiene un carrito por su ID (incluye productos con datos completos).
-
-**Ejemplo response:**
-
-```json
-{
-  "status": "success",
-  "data": {
-    "_id": "642...",
-    "products": [
-      {
-        "product": {
-          "_id": "642...",
-          "title": "iPhone 14",
-          "price": 1099000
-        },
-        "quantity": 1
-      }
-    ]
-  }
-}
-```
-
----
+Obtiene un carrito con productos poblados.
 
 #### `POST /api/carts/:cid/product/:pid`
 Agrega un producto al carrito (incrementa cantidad si ya existe).
 
-**Ejemplo curl:**
-
-```bash
-curl -X POST http://localhost:8080/api/carts/642.../product/642...
-```
-
----
-
 #### `DELETE /api/carts/:cid/products/:pid`
 Elimina un producto del carrito.
 
-**Ejemplo curl:**
+---
 
-```bash
-curl -X DELETE http://localhost:8080/api/carts/642.../products/642...
-```
+## 🎯 Interacción con el frontend
+
+### Panel de Administración (`/`)
+- **Agregar productos**: Formulario con subida de imagen.
+- **Lista en tiempo real**: Tabla que se actualiza automáticamente con Socket.IO.
+- **Búsqueda**: Filtrar productos por título/categoría/código.
+- **Edición inline**: Hacer clic en campos para editar.
+- **Eliminar**: Botón con confirmación.
+
+### Página de Productos (`/products`)
+- **Paginación**: Navegación entre páginas.
+- **Filtros**: Búsqueda, rango de precios, ordenamiento.
+- **Agregar al carrito**: Botón para cada producto.
+
+### Productos en Tiempo Real (`/realtimeproducts`)
+- **Lista live**: Actualizaciones sin recargar página.
+- **Búsqueda debounced**: 300ms de delay para evitar llamadas excesivas.
+- **Eliminar productos**: Con confirmación.
+
+### Carrito (`/carts`)
+- **Visualización**: Lista de productos con cantidad y precio total.
+- **Eliminar items**: Remover productos del carrito.
 
 ---
 
-#### `PUT /api/carts/:cid/products/:pid`
-Actualiza la cantidad de un producto en el carrito.
+## ✨ Funcionalidades / Features
 
-**Body (JSON):**
+### Gestión de Productos
+- ✅ CRUD completo (Crear, Leer, Actualizar, Eliminar).
+- ✅ Validación de campos requeridos y códigos únicos.
+- ✅ Subida de imágenes de producto.
+- ✅ Búsqueda y filtros avanzados.
 
-```json
-{ "quantity": 3 }
-```
+### Gestión de Carrito
+- ✅ Crear carrito automáticamente al visitar la página.
+- ✅ Agregar productos con control de cantidad.
+- ✅ Persistencia en base de datos.
+- ✅ Validación de existencia de productos.
 
-**Ejemplo curl:**
+### Funcionalidades en Tiempo Real
+- ✅ Actualización automática de listas con Socket.IO.
+- ✅ Sin recarga de página para mejor UX.
+- ✅ Eventos emitidos en creación/edición/eliminación.
 
-```bash
-curl -X PUT http://localhost:8080/api/carts/642.../products/642... \
-  -H "Content-Type: application/json" \
-  -d '{"quantity": 3}'
-```
+### Subida de Archivos
+- ✅ Multer para manejo de archivos.
+- ✅ Almacenamiento en `/public/uploads/`.
+- ✅ Nombres únicos con timestamp.
 
----
-
-#### `DELETE /api/carts/:cid`
-Vacía el carrito (elimina todos los productos).
-
-**Ejemplo curl:**
-
-```bash
-curl -X DELETE http://localhost:8080/api/carts/642...
-```
-
----
-
-## 🖥️ Interacción con el frontend
-
-El frontend está implementado con **Handlebars** y **JavaScript en el cliente** (archivos en `public/js/`).
-
-### Páginas principales
-
-- **Home** (`/`) – Formulario para agregar productos y listado con botones de eliminación.
-- **Productos** (`/products`) – Ver productos con filtros (texto, precio, orden) y paginación.
-- **Productos en tiempo real** (`/realtimeproducts`) – Elimina productos y actualiza la lista automáticamente con Socket.IO.
-- **Carrito** (`/carts`) – Muestra el carrito actual (se guarda `cartId` en `localStorage`), permite eliminar ítems y vaciar el carrito.
-
-### Flujo básico de frontend
-
-1. Usuario carga `products.js` o `realtimeProducts.js`.
-2. El JS realiza peticiones a `/api/products` para obtener datos.
-3. El backend responde JSON y el cliente renderiza en HTML.
-4. Al agregar/eliminar productos se usan endpoints de la API (`/api/products`, `/api/carts/...`).
+### Paginación y Filtros
+- ✅ Paginación con mongoose-paginate-v2.
+- ✅ Filtros por precio, categoría, búsqueda de texto.
+- ✅ Ordenamiento ascendente/descendente.
 
 ---
 
-## ✅ Funcionalidades / Features
-
-- **CRUD de productos** (crear / leer / actualizar / eliminar).
-- **Paginación y filtros** en listado de productos.
-- **Subida de imagen** de producto con Multer (almacena en `public/uploads`).
-- **Carrito persistente** (MongoDB) con:
-  - Agregar producto (incrementa cantidad si ya está).
-  - Eliminar producto.
-  - Actualizar cantidad.
-  - Vaciar carrito.
-- **Sincronización en tiempo real** de la lista de productos con Socket.IO.
-- **Front-end básico** con Handlebars + Vanilla JS.
-
----
-
-## 🛠 Tecnologías utilizadas
+## 🛠️ Tecnologías utilizadas
 
 ### Backend
-
-- Node.js (ESModules)
-- Express
-- MongoDB (Atlas/local)
-- Mongoose
-- Socket.IO
-- Multer (uploads)
-- mongoose-paginate-v2
-- dotenv
+- **Node.js** - Runtime de JavaScript.
+- **Express.js** - Framework web.
+- **MongoDB** - Base de datos NoSQL.
+- **Mongoose** - ODM para MongoDB.
+- **Socket.IO** - Comunicación en tiempo real.
+- **Multer** - Manejo de archivos multipart.
+- **dotenv** - Variables de entorno.
 
 ### Frontend
+- **Handlebars** - Motor de plantillas.
+- **Vanilla JavaScript** - Lógica cliente.
+- **SweetAlert2** - Alertas y confirmaciones.
+- **CSS** - Estilos personalizados.
 
-- Handlebars (renderizado de vistas)
-- Vanilla JavaScript (fetch API)
+### DevOps
+- **ES Modules** - Sistema de módulos moderno.
+- **Nodemon** - Recarga automática en desarrollo.
 
 ---
 
-## � Estructura de datos (Schemas MongoDB)
+## 📊 Estructura de datos (Schemas MongoDB)
 
-### Schema de Producto (`Product`)
-
+### Producto
 ```javascript
 {
   title: { type: String, required: true },
@@ -439,65 +256,145 @@ El frontend está implementado con **Handlebars** y **JavaScript en el cliente**
   code: { type: String, required: true, unique: true, index: true },
   stock: { type: Number, required: true },
   category: { type: String, required: true },
-  thumbnail: { type: String }, // Ruta de la imagen subida
+  thumbnail: { type: String }, // Ruta del archivo
   status: { type: Boolean, default: true },
   created: { type: Date, default: Date.now }
 }
 ```
 
-- **Campos clave:** `code` es único e indexado para búsquedas rápidas.
-- **Thumbnail:** Almacena la ruta relativa del archivo subido (ej. `/uploads/thumbnail-...jpg`).
-
-### Schema de Carrito (`Cart`)
-
+### Carrito
 ```javascript
 {
   products: [
     {
-      product: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product"
-      },
-      quantity: {
-        type: Number,
-        default: 1
-      }
+      product: { type: ObjectId, ref: "Product" },
+      quantity: { type: Number, default: 1 }
     }
   ]
 }
 ```
 
-- **Relación:** Usa referencias (`ObjectId`) a productos para evitar duplicación de datos.
-- **Populate:** Al consultar, se puede poblar con datos completos del producto.
+---
+
+## 📁 Estructura del proyecto
+
+```
+backend-1/
+├── package.json
+├── README.md
+├── .env.example
+├── public/
+│   ├── js/
+│   │   ├── admin.js          # Lógica panel admin
+│   │   ├── products.js       # Paginación y filtros
+│   │   ├── realtimeProducts.js # Tiempo real
+│   │   ├── carts.js          # Gestión carrito
+│   │   └── helpers/
+│   │       └── debounce.js   # Utilidad debounce
+│   ├── styles/
+│   │   ├── main.css
+│   │   ├── header.css
+│   │   ├── home.css
+│   │   ├── products.css
+│   │   ├── realtime.css
+│   │   └── carts.css
+│   └── uploads/              # Imágenes subidas
+├── src/
+│   ├── app.js                # Servidor principal
+│   ├── config/
+│   │   └── db.js             # Conexión MongoDB
+│   ├── middleware/
+│   │   └── multer.js         # Config Multer
+│   ├── models/
+│   │   ├── products.model.js
+│   │   └── cart.model.js
+│   ├── routes/
+│   │   ├── products.router.js
+│   │   ├── carts.router.js
+│   │   └── views.router.js
+│   ├── scripts/
+│   │   └── seed.products.js  # Cargar datos ejemplo
+│   ├── utils/
+│   │   └── utils.js          # Utilidades (__dirname)
+│   └── views/
+│       ├── layouts/
+│       │   └── main.handlebars
+│       ├── partials/
+│       │   └── header.handlebars
+│       └── *.handlebars      # Vistas
+```
 
 ---
 
-## �🔄 Diagrama de flujo (ASCII)
+## 📜 Scripts disponibles
 
-### 1) Flujo general (frontend → backend → base de datos)
+### Seed de productos
+```bash
+node src/scripts/seed.products.js
+```
+Carga 60 productos de ejemplo en categorías:
+- **Smartphones** (19): iPhone, Samsung, Xiaomi, etc.
+- **Laptops** (10): MacBook, Dell, HP, Lenovo.
+- **Tablets** (10): iPad, Samsung Tab, etc.
+- **Audio** (10): AirPods, Sony, Bose, JBL.
+- **Wearables** (10): Apple Watch, Samsung Watch.
+- **Cámaras** (6): GoPro, Sony, Canon.
+
+---
+
+## 🔄 Diagrama de flujo (ASCII)
 
 ```
-[Usuario] 
-   │
-   │  (1) Navega a /products (GET)
-   ▼
-[Servidor Express] ──> renderiza Handlebars (vistas)  
-   │
-   │  (2) JS en cliente hace fetch a /api/products
-   ▼
-[API REST] (productos) 
-   │
-   │  (3) Consulta MongoDB (Mongoose)
-   ▼
-[MongoDB] ←─ responde datos ──
+Cliente Browser
+    ↓
+Handlebars Views (/, /products, /realtimeproducts, /carts)
+    ↓
+Express Routes (views.router.js)
+    ↓
+API Endpoints (/api/products, /api/carts)
+    ↓
+Mongoose Models (products.model.js, cart.model.js)
+    ↓
+MongoDB Database
+    ↙        ↘
+Socket.IO    Multer
+(Real-time)  (Uploads)
 ```
 
-### 2) Flujo realtime (Socket.IO)
+---
 
-```
-[Cliente] -- (socket connect) --> [Servidor]
-[Cliente] -- (DELETE /api/products/:id) --> [Servidor]
-[Servidor] -- (emite "updateProducts") --> [Todos los clientes conectados]
+## 🚀 Roadmap de mejoras
+
+- [ ] Autenticación y autorización de usuarios.
+- [ ] Roles de usuario (admin, cliente).
+- [ ] Checkout y procesamiento de pagos.
+- [ ] Inventario automático (reducir stock al comprar).
+- [ ] Validaciones más robustas en frontend.
+- [ ] Tests unitarios e integración.
+- [ ] Dockerización del proyecto.
+- [ ] API documentation con Swagger.
+- [ ] Notificaciones push con Socket.IO.
+- [ ] Búsqueda avanzada con Elasticsearch.
+
+---
+
+## 🤝 Contribución
+
+1. Fork el proyecto.
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`).
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`).
+4. Push a la rama (`git push origin feature/AmazingFeature`).
+5. Abre un Pull Request.
+
+---
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia ISC. Ver el archivo `LICENSE` para más detalles.
+
+---
+
+*Proyecto desarrollado como parte del curso de Backend. Última actualización: Marzo 2026*
 [Cliente] -- (recibe updateProducts) --> actualiza UI
 ```
 

@@ -72,14 +72,10 @@ router.get('/filter', async (req, res) => {
     if (title) {
       filter.$or = [
       { title: { $regex: title, $options: "i" } },
-      { category: { $regex: title, $options: "i" } }
+      { category: { $regex: title, $options: "i" } },
+      { code: { $regex: title, $options: "i" } }
       ];
     }
-    if (minPrice || maxPrice) { 
-      filter.price = {};
-      if (minPrice) filter.price.$gte = Number(minPrice);
-      if (maxPrice) filter.price.$lte = Number(maxPrice);
-      }
     if (code) filter.code = code;
 
     const products = await productsModel.find(filter);
@@ -172,23 +168,34 @@ router.delete('/:id', async (req, res) => {
 // actualizar un producto
 
 router.put('/:id', async (req, res) => {
+  
   try {
-
     const { id } = req.params;
 
     const updatedProduct = await productsModel.findByIdAndUpdate(
       id,
       req.body,
-      { returnDocument: 'after', runValidators: true }
+      { returnDocument: true, runValidators: true }
     );
 
     if (!updatedProduct) {
       return res.status(404).json({ status: 'error', message: 'Producto no encontrado' });
     }
+
+    // emitir actualización
+    const updatedProducts = await productsModel.find();
+    const io = req.app.get("io");
+    if (io) io.emit("updateProducts", updatedProducts);
+
     res.json({ status: 'success', data: updatedProduct });
 
   } catch (error) {
-    res.status(500).json({ status: 'error', message: 'internal server error' });
+    // error de código duplicado
+    if (error.code === 11000) {
+      return res.status(400).json({ status: "error", message: "El código ya existe" });
+    }
+
+    res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
   }
 });
 

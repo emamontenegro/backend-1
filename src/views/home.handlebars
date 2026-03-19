@@ -34,12 +34,28 @@
     </form>
   </div>
 
+  <h3>Buscar Productos</h3>
+
+  <div class="filters-admin">
+    <input 
+      type="text" 
+      id="searchAdmin" 
+      placeholder="Buscar por título, categoría o código"
+      class="input-filter-admin"
+    >
+
+    <button id="resetAdminBtn" class="button-filter-admin">
+      Resetear
+    </button>
+  </div>
+
   <h3>Lista de Productos</h3>
 
   <div id="productList" class="product-list">
-
     <div class="product-item product-header">
       <span>Producto</span>
+      <span>Descripción</span>
+      <span>Código</span>
       <span>Precio</span>
       <span>Stock</span>
       <span>Categoría</span>
@@ -47,28 +63,53 @@
     </div>
 
     {{#each products}}
-      <div class="product-item">
-        <span>{{this.title}}</span>
-        <span>${{this.price}}</span>
-        <span>{{this.stock}}</span>
-        <span>{{this.category}}</span>
+  <div class="product-item">
 
-        <span>
-          <button class="delete-btn" data-id="{{this._id}}">
-            Eliminar
-          </button>
-        </span>
+    <span class="editable" data-field="title" data-id="{{this._id}}">
+      <span class="text">{{this.title}}</span>
+      <input class="input hidden" type="text" value="{{this.title}}">
+    </span>
 
-      </div>
+    <span class="editable" data-field="description" data-id="{{this._id}}">
+      <span class="text">{{this.description}}</span>
+      <input class="input hidden" type="text" value="{{this.description}}">
+    </span>
+
+    <span class="editable" data-field="code" data-id="{{this._id}}">
+      <span class="text">{{this.code}}</span>
+      <input class="input hidden" type="text" value="{{this.code}}">
+    </span>
+
+    <span class="editable" data-field="price" data-id="{{this._id}}">
+      <span class="text">${{this.price}}</span>
+      <input class="input hidden" type="number" value="{{this.price}}">
+    </span>
+
+    <span class="editable" data-field="stock" data-id="{{this._id}}">
+      <span class="text">{{this.stock}}</span>
+      <input class="input hidden" type="number" value="{{this.stock}}">
+    </span>
+
+    <span class="editable" data-field="category" data-id="{{this._id}}">
+      <span class="text">{{this.category}}</span>
+      <input class="input hidden" type="text" value="{{this.category}}">
+    </span>
+
+    <span>
+      <button class="delete-btn" data-id="{{this._id}}">
+        Eliminar
+      </button>
+    </span>
+
+  </div>
     {{/each}}
 
   </div>
+    {{#if emptyMessage}}
+      <p>{{emptyMessage}}</p>
+    {{/if}}
+  </div>
 
-  {{#if emptyMessage}}
-    <p>{{emptyMessage}}</p>
-  {{/if}}
-
-</div>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/js/admin.js"></script>

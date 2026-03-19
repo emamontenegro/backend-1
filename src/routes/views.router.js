@@ -91,10 +91,10 @@ router.get('/products', async (req, res) => {
 });
 
 // Ruta carrito
-router.get('/cart', async (req, res) => {
+router.get('/carts', async (req, res) => {
   try {
 
-    res.render('cart', {
+    res.render('carts', {
       title: 'Carrito',
       styles: ['carts.css']
     });

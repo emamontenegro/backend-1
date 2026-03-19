@@ -15,19 +15,56 @@ socket.on("updateProducts", products => {
 
 document.addEventListener("click", async (e) => {
 
-  if (e.target.classList.contains("delete-btn")) {
+  const btn = e.target.closest(".delete-btn");
+  if (!btn) return;
 
-    try {
-      const id = e.target.dataset.id;
-      const res = await fetch(`/api/products/${id}`, { method: "DELETE"});
+  const id = btn.dataset.id;
 
-      if (!res.ok) throw new Error("Error eliminando producto");
-      if (isFiltering) { searchProducts() };
+  const result = await Swal.fire({
+    title: "¿Eliminar producto?",
+    text: "Esta acción no se puede deshacer",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "Cancelar",
+    background: "#1e1e2a",
+    color: "#fff"
+  });
 
-    } catch (error) {
-      console.error("Error eliminando producto:", error);
-    }
-  }
+  if (!result.isConfirmed) return;
+
+  try {
+    const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
+    if (!res.ok) throw new Error();
+
+  // feedback visual
+    btn.textContent = "✔ Eliminado";
+    btn.disabled = true;
+
+    setTimeout(() => {
+      if (isFiltering) searchProducts();
+    }, 500);
+
+    Swal.fire({
+      toast: true,
+      position: "top-end",
+      icon: "success",
+      title: "Producto eliminado",
+      showConfirmButton: false,
+      timer: 1200,
+      background: "#1e1e2a",
+      color: "#fff"
+    });
+
+  } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "No se pudo eliminar el producto",
+        background: "#1e1e2a",
+      color: "#fff"
+    });
+    console.error("Error eliminando producto:", error);}
 });
 
 // Búsqueda de productos
@@ -36,10 +73,8 @@ const searchProducts = async () => {
 
   try {
     const title = document.getElementById("searchTitle").value;
-    const minPrice = document.getElementById("minPrice").value;
-    const maxPrice = document.getElementById("maxPrice").value;
 
-    if (!title && !minPrice && !maxPrice) {
+    if (!title) {
       isFiltering = false;
       return;
     }
@@ -49,8 +84,6 @@ const searchProducts = async () => {
     const query = new URLSearchParams();
 
     if (title) query.append("title", title);
-    if (minPrice) query.append("minPrice", minPrice);
-    if (maxPrice) query.append("maxPrice", maxPrice);
 
     const res = await fetch(`/api/products/filter?${query}`);
 
@@ -61,6 +94,13 @@ const searchProducts = async () => {
     renderProducts(data.data);
 
   } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "No se pudo realizar la búsqueda",
+        background: "#1e1e2a",
+        color: "#fff"
+      });
     console.error("Error buscando productos:", error);
   }
 };
@@ -69,8 +109,6 @@ const searchProducts = async () => {
 const searchProductsDebounced = debounce(searchProducts, 300);
 
 document.getElementById("searchTitle").addEventListener("input", searchProductsDebounced);
-document.getElementById("minPrice").addEventListener("input", searchProductsDebounced);
-document.getElementById("maxPrice").addEventListener("input", searchProductsDebounced);
 
 // Función para renderizar productos en la página
 

@@ -57,13 +57,14 @@ input:focus {
 
 /* Botón */
 button {
-  margin-top: 1rem;
-  padding: 0.8rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.7rem;
   border-radius: 6px;
   border: none;
   background-color: #4caf50;
   color: white;
-  font-weight: bold;
+  font-weight: 600;
+  font-size: 0.8rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -72,6 +73,54 @@ button:hover {
   background-color: #43a047;
   transform: translateY(-2px);
 }
+
+/* Filtros */
+.filters-admin {
+  display: flex;
+  gap: 10px;
+  margin: 1rem 0 1.5rem 0;
+  align-items: center;
+}
+
+/* Input búsqueda */
+.input-filter-admin {
+  flex: 1;
+  padding: 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #333;
+  background-color: #12121a;
+  color: white;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-filter-admin::placeholder {
+  color: #777;
+}
+
+.input-filter-admin:focus {
+  outline: none;
+  border-color: #4caf50;
+  box-shadow: 0 0 5px rgba(76, 175, 80, 0.4);
+}
+
+/* Botón reset */
+.button-filter-admin {
+  padding: 0.55rem 0.9rem;
+  border-radius: 6px;
+  border: none;
+  background-color: #2c2c3a;
+  color: #ccc;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.button-filter-admin:hover {
+  background-color: #3a3a4d;
+  color: white;
+  transform: translateY(-1px);
+}
+
 
 /* Lista de Productos */
 
@@ -85,15 +134,18 @@ button:hover {
 /* Fila */
 .product-item {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
+  grid-template-columns: 1.5fr 2fr 1fr 1fr 1fr 1fr 1fr;
+  align-items: center;
+  gap: 10px;
   padding: 1rem;
   background-color: #1b1b26;
   border-bottom: 1px solid #2c2c3a;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .product-item:hover {
   background-color: #222232;
+  transform: scale(1.01);
 }
 
 /* Encabezado */
@@ -107,15 +159,58 @@ button:hover {
 .product-item span {
   font-size: 0.9rem;
   color: #ccc;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
+.product-item span:last-child {
+  display: flex;
+  gap: 6px;
+}
+
+/* Botón de Eliminar */
 .home-container .delete-btn {
   background-color: #e53935;
-  padding: 0.4rem 0.6rem;
-  font-size: 0.8rem;
 }
 
 .home-container .delete-btn:hover {
   background-color: #c62828;
-  transform: translateY(-2px);
+}
+
+/* Editable */
+.editable {
+  display: block;
+  width: 100%;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px 4px;
+  transition: background 0.2s;
+}
+
+.editable:hover {
+  background-color: rgba(76, 175, 80, 0.1);
+}
+
+/* Input */
+.input {
+  width: 100%;
+  padding: 4px;
+  border-radius: 4px;
+  border: 1px solid #4caf50;
+  background-color: #12121a;
+  color: white;
+}
+
+.updated {
+  background: linear-gradient(
+    90deg,
+    rgba(46, 204, 113, 0.2),
+    transparent
+  );
+}
+
+.hidden {
+  display: none;
 }
