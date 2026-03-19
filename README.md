@@ -76,7 +76,7 @@ MONGO_URI=<TU_URI_DE_MONGODB>
 | ------- | ----------- |
 | `npm run dev` | Inicia el servidor en modo desarrollo (recomendado) con recarga automática |
 | `npm start` | Inicia el servidor en modo producción |
-| `node src/scripts/seed.products.js` | Carga productos de ejemplo en la base de datos (60 productos) |
+| `node src/scripts/seed.products.js` | Carga productos de ejemplo en la base de datos (64 productos) |
 
 ---
 
@@ -161,8 +161,14 @@ Obtiene un carrito con productos poblados.
 #### `POST /api/carts/:cid/product/:pid`
 Agrega un producto al carrito (incrementa cantidad si ya existe).
 
+#### `PUT /api/carts/:cid/products/:pid`
+Actualiza la cantidad de un producto en el carrito.
+
 #### `DELETE /api/carts/:cid/products/:pid`
 Elimina un producto del carrito.
+
+#### `DELETE /api/carts/:cid`
+Vacía completamente el carrito.
 
 ---
 
@@ -202,6 +208,8 @@ Elimina un producto del carrito.
 ### Gestión de Carrito
 - ✅ Crear carrito automáticamente al visitar la página.
 - ✅ Agregar productos con control de cantidad.
+- ✅ Actualizar cantidades en el carrito.
+- ✅ Vaciar carrito completo.
 - ✅ Persistencia en base de datos.
 - ✅ Validación de existencia de productos.
 
@@ -332,8 +340,8 @@ backend-1/
 ```bash
 node src/scripts/seed.products.js
 ```
-Carga 60 productos de ejemplo en categorías:
-- **Smartphones** (19): iPhone, Samsung, Xiaomi, etc.
+Carga 64 productos de ejemplo en categorías:
+- **Smartphones** (18): iPhone, Samsung, Xiaomi, etc.
 - **Laptops** (10): MacBook, Dell, HP, Lenovo.
 - **Tablets** (10): iPad, Samsung Tab, etc.
 - **Audio** (10): AirPods, Sony, Bose, JBL.
@@ -395,7 +403,6 @@ Este proyecto está bajo la Licencia ISC. Ver el archivo `LICENSE` para más det
 ---
 
 *Proyecto desarrollado como parte del curso de Backend. Última actualización: Marzo 2026*
-[Cliente] -- (recibe updateProducts) --> actualiza UI
 ```
 
 ---

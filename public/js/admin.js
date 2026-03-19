@@ -93,27 +93,26 @@ if (form) {
 
 // Buscar productos
 const searchProductsAdmin = async () => {
-
+ 
   try {
-    const value = document.getElementById("searchAdmin").value;
+    const title = document.getElementById("searchAdmin").value;
 
-    if (!value) {
+    if (!title) {
       isFiltering = false;
+      await loadAllProductsAdmin();
       return;
     }
 
     isFiltering = true;
 
-    const query = new URLSearchParams();
-    query.append("title", value);
+    const params = new URLSearchParams();
+    params.append("title", title);
 
-    const res = await fetch(`/api/products/filter?${query}`);
-
+    const res = await fetch(`/api/products?${params}`);
     if (!res.ok) throw new Error();
 
     const data = await res.json();
-
-    renderProducts(data.data);
+    renderProducts(data.payload);
 
   } catch (error) {
     console.error(error);
@@ -121,17 +120,18 @@ const searchProductsAdmin = async () => {
   }
 };
 
+// Evento input para búsqueda
 document.getElementById("searchAdmin").addEventListener("input", searchProductsAdmin);
 
 // Resetear filtros
-document.getElementById("resetAdminBtn").addEventListener("click", async () => {
-
-  isFiltering = false;
-
+const loadAllProductsAdmin = async () => {
   try {
-    const res = await fetch("/api/products");
-    const data = await res.json();
+    isFiltering = false;
 
+    const res = await fetch("/api/products");
+    if (!res.ok) throw new Error();
+
+    const data = await res.json();
     renderProducts(data.payload);
 
     document.getElementById("searchAdmin").value = "";
@@ -140,7 +140,9 @@ document.getElementById("resetAdminBtn").addEventListener("click", async () => {
     console.error(error);
     showToast("Error al resetear", "error");
   }
-});
+};
+
+document.getElementById("resetAdminBtn").addEventListener("click", loadAllProductsAdmin);
 
 // Eliminar producto
 document.addEventListener("click", async (e) => {

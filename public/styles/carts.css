@@ -69,23 +69,6 @@
   font-weight: bold;
 }
 
-/* BOTÓN VACIAR */
-.clearCartBtn {
-  display: block;
-  margin: 1rem auto;
-  background: #f59e0b;
-  color: white;
-  border: none;
-  padding: 0.7rem 1.2rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.clearCartBtn:hover {
-  background: #d97706;
-}
-
 /* VOLVER */
 .back-to-products {
   display: block;

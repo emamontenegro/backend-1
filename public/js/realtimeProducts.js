@@ -42,7 +42,11 @@ document.addEventListener("click", async (e) => {
     btn.disabled = true;
 
     setTimeout(() => {
-      if (isFiltering) searchProducts();
+      if (isFiltering) { 
+        searchProducts();
+      } else {
+        resetBtn();
+      }
     }, 500);
 
     Swal.fire({
@@ -76,31 +80,36 @@ const searchProducts = async () => {
 
     if (!title) {
       isFiltering = false;
+
+      const res = await fetch("/api/products");
+      const data = await res.json();
+      renderProducts(data.payload);
+
       return;
     }
 
     isFiltering = true;
 
-    const query = new URLSearchParams();
+    const params = new URLSearchParams();
+    params.append("title", title);
 
-    if (title) query.append("title", title);
-
-    const res = await fetch(`/api/products/filter?${query}`);
+    const res = await fetch(`/api/products?${params}`);
 
     if (!res.ok) throw new Error("Error en la búsqueda");
 
     const data = await res.json();
 
-    renderProducts(data.data);
+    renderProducts(data.payload);
 
   } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "No se pudo realizar la búsqueda",
-        background: "#1e1e2a",
-        color: "#fff"
-      });
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "No se pudo realizar la búsqueda",
+      background: "#1e1e2a",
+      color: "#fff"
+    });
+
     console.error("Error buscando productos:", error);
   }
 };

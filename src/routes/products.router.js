@@ -7,34 +7,49 @@ const router = express.Router();
 // ruta para obtener todos los productos
 
 router.get('/', async (req, res) => {
-
+ 
   try {
+    const {
+      limit = 10,
+      page = 1,
+      sort,
+      title,
+      category,
+      code,
+      minPrice,
+      maxPrice
+    } = req.query;
 
-    const { limit = 10, page = 1, sort, query, minPrice, maxPrice } = req.query;
+    const filter = {};
 
-    let filter = {};
-
-    // búsqueda por título o categoría
-    if (query) {
+    // Filtro por título, categoría o código usando $or solo si se pasa 'title'
+    if (title) {
       filter.$or = [
-        { title: { $regex: query, $options: "i" } },
-        { category: { $regex: query, $options: "i" } }
+        { title: { $regex: title, $options: "i" } },
+        { category: { $regex: title, $options: "i" } },
+        { code: { $regex: title, $options: "i" } }
       ];
     }
 
-    // filtro por precio
+    // Filtro por categoría exacta 
+    if (category) { filter.category = { $regex: category, $options: "i" } };
+
+    // Filtro por código exacto 
+    if (code) { filter.code = code };
+
+    // Filtro por precio
     if (minPrice || maxPrice) {
       filter.price = {};
       if (minPrice) filter.price.$gte = Number(minPrice);
       if (maxPrice) filter.price.$lte = Number(maxPrice);
     }
 
-    // orden por precio
-    let sortOption = {};
+    // Ordenamiento
+    const sortOption = {};
     if (sort === "asc") sortOption.price = 1;
     if (sort === "desc") sortOption.price = -1;
 
-    // paginación con mongoose-paginate-v2
+    // Paginación
     const result = await productsModel.paginate(filter, {
       limit: Number(limit),
       page: Number(page),
@@ -58,33 +73,6 @@ router.get('/', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ status: "error", message: "Internal server error" });
-  }
-});
-
-// ruta para filtrar productos por título, categoría, precio máximo o código
-
-router.get('/filter', async (req, res) => {
-
-  try {
-    const {title, category, minPrice, maxPrice, code } = req.query;
-    const filter = {};
-
-    if (title) {
-      filter.$or = [
-      { title: { $regex: title, $options: "i" } },
-      { category: { $regex: title, $options: "i" } },
-      { code: { $regex: title, $options: "i" } }
-      ];
-    }
-    if (code) filter.code = code;
-
-    const products = await productsModel.find(filter);
-
-    res.json({ status: 'success', data: products });
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ status: 'error', message: 'Internal server error' });
   }
 });
 
