@@ -48,11 +48,10 @@ Este proyecto es una tienda online didáctica que incluye:
 
 ## 👤 Autor
 
-**Emanuel Montenegro**
-
-- **Portfolio**: [https://emanuelmonenegro.dev](https://emanuelmonenegro.dev)
-- **GitHub**: [https://github.com/emamontenegro](https://github.com/emamontenegro)
-- **LinkedIn**: [https://www.linkedin.com/in/emanuel-montenegro-dev](https://www.linkedin.com/in/emanuel-montenegro-dev)
+- Author: [Emanuel Montenegro](https://emanuelmontenegro.dev)
+- Portfolio: [emanuelmontenegro.dev](https://emanuelmontenegro.dev)
+- LinkedIn: [linkedin.com/in/emanuelmontenegro](https://www.linkedin.com/in/emanuelmontenegro)
+- GitHub: [github.com/emanuelmontenegro](https://github.com/emanuelmontenegro)
 
 ---
 
