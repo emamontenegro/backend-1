@@ -5,6 +5,7 @@ Proyecto full-stack de ejemplo para una tienda online (productos + carrito) con 
 ## 📌 Tabla de contenido
 
 - [Descripción](#descripción)
+- [Autor](#autor)
 - [Instalación](#instalación)
   - [Dependencias](#dependencias)
   - [Variables de entorno](#variables-de-entorno)
@@ -42,6 +43,16 @@ Este proyecto es una tienda online didáctica que incluye:
 - **Gestión de carrito de compras** con persistencia en base de datos.
 - **Panel de administración** para agregar, editar y eliminar productos en tiempo real.
 - **Script de seed** para cargar productos de ejemplo.
+
+---
+
+## 👤 Autor
+
+**Emanuel Montenegro**
+
+- **Portfolio**: [https://emanuelmonenegro.dev](https://emanuelmonenegro.dev)
+- **GitHub**: [https://github.com/emamontenegro](https://github.com/emamontenegro)
+- **LinkedIn**: [https://www.linkedin.com/in/emanuel-montenegro-dev](https://www.linkedin.com/in/emanuel-montenegro-dev)
 
 ---
 
